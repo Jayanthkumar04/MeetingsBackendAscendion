@@ -29,8 +29,9 @@ public class AuthController : ControllerBase
     {
         var identityUser = new IdentityUser
         {
-            UserName = registerRequestDto.Username,
-            Email = registerRequestDto.Username
+            UserName = registerRequestDto.Name,
+            Email = registerRequestDto.Username,
+          
         };
 
         var identityResult = await userManager.CreateAsync(identityUser, registerRequestDto.Password);
@@ -64,11 +65,13 @@ public class AuthController : ControllerBase
                
                     var authToken = tokenRepository.CreateJWTToken(user);
 
-                    var response = new LoginResponseDto
-                    {
-                        AuthToken = authToken,
-                        Email = user.Email,
-                    };
+                var response = new LoginResponseDto
+                {
+                    AuthToken = authToken,
+                    Email = user.Email,
+                    Message = "login is successfull",
+
+                };
 
                     return Ok(response);
                 
