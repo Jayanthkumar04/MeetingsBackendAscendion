@@ -11,14 +11,59 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeetingsBackendAscendion.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241215100041_Db initialization")]
-    partial class Dbinitialization
+    [Migration("20241216140551_Updating database once again")]
+    partial class Updatingdatabaseonceagain
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
+
+            modelBuilder.Entity("MeetingsBackendAscendion.Models.Domain.Meeting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Meetings");
+                });
+
+            modelBuilder.Entity("MeetingsBackendAscendion.Models.Domain.MeetingAttendee", b =>
+                {
+                    b.Property<int>("MeetingId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("MeetingId", "Id");
+
+                    b.ToTable("MeetingAttendees");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -212,6 +257,17 @@ namespace MeetingsBackendAscendion.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("MeetingsBackendAscendion.Models.Domain.MeetingAttendee", b =>
+                {
+                    b.HasOne("MeetingsBackendAscendion.Models.Domain.Meeting", "Meeting")
+                        .WithMany("Attendees")
+                        .HasForeignKey("MeetingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Meeting");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -261,6 +317,11 @@ namespace MeetingsBackendAscendion.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MeetingsBackendAscendion.Models.Domain.Meeting", b =>
+                {
+                    b.Navigation("Attendees");
                 });
 #pragma warning restore 612, 618
         }

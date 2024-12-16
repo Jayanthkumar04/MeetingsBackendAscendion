@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using MeetingsBackendAscendion.Models.DTO;
 //using MeetingsBackendAscendion.CustomActionFilters;
 using MeetingsBackendAscendion.Repositories;
-using MeetingsBackendAscendion.Models.DTO;
 using MeetingsBackendAscendion.Repositories;
+using MeetingsBackendAscendion.Models.Domain;
 
 namespace AscendionAPI.Controllers;
 

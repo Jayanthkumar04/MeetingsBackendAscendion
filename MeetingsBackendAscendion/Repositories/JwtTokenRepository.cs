@@ -22,8 +22,9 @@ public class JwtTokenRepository : ITokenRepository
         var claims = new List<Claim>();
 
         claims.Add(new Claim(ClaimTypes.Email, user.Email));
+        claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
 
-        
+
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -32,7 +33,7 @@ public class JwtTokenRepository : ITokenRepository
             configuration["Jwt:Issuer"],
             configuration["Jwt:Audience"],
             claims,
-            expires: DateTime.Now.AddMinutes(15),
+            expires: DateTime.Now.AddDays(7),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

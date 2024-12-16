@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -32,14 +33,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-    });
+    }
+    
+
+
+    );
+
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite("Data Source=app.db"));
 
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()
-    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("AscendionAPI")
+    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("MeetingsBackendAscendion")
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
@@ -87,6 +94,8 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+
 
 var app = builder.Build();
 
