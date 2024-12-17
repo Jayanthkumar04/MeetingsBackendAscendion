@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using MeetingsBackendAscendion.Mapper;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -41,9 +42,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite("Data Source=app.db"));
-
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite("Data Source=app.db"));
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()
     .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("MeetingsBackendAscendion")
@@ -64,6 +63,7 @@ builder.Services.AddScoped<ITokenRepository, JwtTokenRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 // Mody the AddSwaggerGen() call like so...
 builder.Services.AddSwaggerGen(options =>
 {
@@ -98,7 +98,6 @@ builder.Services.AddSwaggerGen(options =>
 
 
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

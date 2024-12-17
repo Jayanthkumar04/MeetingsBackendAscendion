@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeetingsBackendAscendion.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241216140551_Updating database once again")]
-    partial class Updatingdatabaseonceagain
+    [Migration("20241217060811_updating database")]
+    partial class updatingdatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,7 +45,7 @@ namespace MeetingsBackendAscendion.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Meetings");
+                    b.ToTable("Meetings", (string)null);
                 });
 
             modelBuilder.Entity("MeetingsBackendAscendion.Models.Domain.MeetingAttendee", b =>
@@ -62,7 +62,7 @@ namespace MeetingsBackendAscendion.Migrations
 
                     b.HasKey("MeetingId", "Id");
 
-                    b.ToTable("MeetingAttendees");
+                    b.ToTable("MeetingAttendees", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

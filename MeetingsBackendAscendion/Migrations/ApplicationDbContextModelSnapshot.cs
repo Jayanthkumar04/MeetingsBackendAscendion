@@ -42,7 +42,7 @@ namespace MeetingsBackendAscendion.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Meetings");
+                    b.ToTable("Meetings", (string)null);
                 });
 
             modelBuilder.Entity("MeetingsBackendAscendion.Models.Domain.MeetingAttendee", b =>
@@ -59,7 +59,7 @@ namespace MeetingsBackendAscendion.Migrations
 
                     b.HasKey("MeetingId", "Id");
 
-                    b.ToTable("MeetingAttendees");
+                    b.ToTable("MeetingAttendees", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

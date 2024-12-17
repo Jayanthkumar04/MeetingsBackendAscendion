@@ -19,13 +19,21 @@ namespace MeetingsBackendAscendion.Data
         // Optional: Configure models using Fluent API
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder); // Include the Identity table configurations
+            base.OnModelCreating(modelBuilder); // Include Identity table configurations
 
-            // Fluent API configuration (optional)
             modelBuilder.Entity<MeetingAttendee>()
-                .HasKey(ma => new { ma.MeetingId, ma.Id }); // Composite key for MeetingAttendee table
+                  .HasKey(ma => new { ma.MeetingId, ma.Id });  // Composite key on MeetingId and Id (UserId)
 
-            // You can add additional configurations for the Meeting and MeetingAttendee entities here if needed
+            modelBuilder.Entity<MeetingAttendee>()
+                .HasOne(ma => ma.Meeting)   // Each MeetingAttendee is related to one Meeting
+                .WithMany(m => m.Attendees) // Each Meeting has many MeetingAttendees
+                .HasForeignKey(ma => ma.MeetingId); // The foreign key is MeetingId
+
+            modelBuilder.Entity<Meeting>()
+                .ToTable("Meetings"); // Explicitly set the table name for Meeting (optional)
+
+            modelBuilder.Entity<MeetingAttendee>()
+                .ToTable("MeetingAttendees"); // Explicitly set the table name for MeetingAttendees (optional)
         }
     }
 }
