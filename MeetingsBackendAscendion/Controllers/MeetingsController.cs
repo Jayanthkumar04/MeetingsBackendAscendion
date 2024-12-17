@@ -104,7 +104,7 @@ namespace MeetingsBackendAscendion.Controllers
 
             var currentUser = await _userManager.GetUserAsync(User);
 
-            if(currentUser == null)
+            if (currentUser == null)
             {
                 return Unauthorized("user is not authenticated");
             }
@@ -112,9 +112,14 @@ namespace MeetingsBackendAscendion.Controllers
             var endOfDay = startOfDay.AddDays(1).AddTicks(-1);
 
             var meetings = await _db.Meetings
+      .Where(m => m.Date >= startOfDay && m.Date <= endOfDay && m.Attendees.Any(ma => ma.Id == currentUser.Id))
       .Include(m => m.Attendees)  // Include the Attendees navigation property
       .ToListAsync();
 
+            if (meetings == null || !meetings.Any())
+            {
+                return Ok(new List<MeetingDto>()); // Return an empty list if no meetings are found
+            }
             Console.WriteLine(meetings);
 
             var meetingDtos = meetings.Select(m => new MeetingDto
@@ -180,7 +185,7 @@ namespace MeetingsBackendAscendion.Controllers
                     // No filtering needed for 'all'
                     break;
             }
-            if (search!=null)
+            if (search != null)
             {
                 meetingsQuery = meetingsQuery.Where(m => EF.Functions.Like(m.Description, $"%{search}%"));
             }
@@ -211,6 +216,46 @@ namespace MeetingsBackendAscendion.Controllers
 
 
         }
+
+        [HttpPost]
+        [Route("meetings/{id}")]
+        public async Task<IActionResult> RemoveAttendeeFromMeeting([FromRoute] int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized("User is not authenticated.");
+            }
+
+            var meeting = await _db.Meetings
+        .Include(m => m.Attendees)
+        .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (meeting == null)
+            {
+                return NotFound("Meeting not found.");
+            }
+
+            // Check if the current user is part of the meeting attendees
+            var attendeeToRemove = meeting.Attendees.FirstOrDefault(a => a.Id == currentUser.Id);
+            if (attendeeToRemove == null)
+            {
+                return BadRequest("The user is not part of this meeting.");
+            }
+
+            // Remove the attendee from the meeting
+            meeting.Attendees.Remove(attendeeToRemove);
+
+            // Save changes to the database
+            await _db.SaveChangesAsync();
+
+            return Ok("Attendee removed from the meeting.");
+        }
+
+    
+
+
+
 
 
         }
