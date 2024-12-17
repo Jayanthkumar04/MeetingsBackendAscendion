@@ -139,7 +139,7 @@ namespace MeetingsBackendAscendion.Controllers
 
         [HttpGet]
         [Route("meetings/filter")]
-        public async Task<ActionResult<IEnumerable<MeetingDto>>> GetMeetings([FromQuery] string period, [FromQuery] string search)
+        public async Task<ActionResult<IEnumerable<MeetingDto>>> GetMeetings([FromQuery] string? period = null, [FromQuery] string? search = null)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -150,20 +150,29 @@ namespace MeetingsBackendAscendion.Controllers
             var currentDate = DateTime.Now;
 
             IQueryable<Meeting> meetingsQuery = _db.Meetings
-        .Where(m => m.Attendees.Any(a => a.Id == currentUser.Id));
+      .Where(m => m.Attendees.Any(ma => ma.Id == currentUser.Id))
+      .Include(m => m.Attendees)
+      .AsQueryable();
+
+
+            if (string.IsNullOrEmpty(period))
+            {
+                period = "all"; // Default to "all" if period is null or empty
+            }
+            Console.WriteLine(meetingsQuery);
 
             switch (period.ToLower())
             {
                 case "past":
-                    meetingsQuery = meetingsQuery.Where(m => m.Date < currentDate.Date); // Past meetings
+                    meetingsQuery = meetingsQuery.Where(m => m.Date.Date < currentDate.Date); // Past meetings
                     break;
 
                 case "future":
-                    meetingsQuery = meetingsQuery.Where(m => m.Date > currentDate.Date); // Future meetings
+                    meetingsQuery = meetingsQuery.Where(m => m.Date.Date > currentDate.Date); // Future meetings
                     break;
 
                 case "present":
-                    meetingsQuery = meetingsQuery.Where(m => m.Date == currentDate.Date); // Meetings happening today
+                    meetingsQuery = meetingsQuery.Where(m => m.Date.Date == currentDate.Date); // Meetings happening today
                     break;
 
                 case "all":
@@ -173,10 +182,15 @@ namespace MeetingsBackendAscendion.Controllers
             }
             if (search!=null)
             {
-                meetingsQuery = meetingsQuery.Where(m => m.Description.Contains(search, StringComparison.OrdinalIgnoreCase));
+                meetingsQuery = meetingsQuery.Where(m => EF.Functions.Like(m.Description, $"%{search}%"));
             }
 
             var meetings = await meetingsQuery.ToListAsync();
+
+            if (meetings == null || !meetings.Any())
+            {
+                return Ok(new List<MeetingDto>()); // Return an empty list if no meetings are found
+            }
 
             var meetingDtos = meetings.Select(m => new MeetingDto
             {
@@ -186,7 +200,7 @@ namespace MeetingsBackendAscendion.Controllers
                 Date = m.Date,
                 StartTime = new TimeOnly(m.StartTime.Hour, m.StartTime.Minute),
                 EndTime = new TimeOnly(m.EndTime.Hour, m.EndTime.Minute),
-                Attendees = m.Attendees.Select(a => new CustomMeetingAttendees
+                Attendees = m.Attendees?.Select(a => new CustomMeetingAttendees
                 {
                     UserId = a.Id,
                     Email = a.Email
