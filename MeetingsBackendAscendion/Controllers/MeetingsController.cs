@@ -252,12 +252,79 @@ namespace MeetingsBackendAscendion.Controllers
             return Ok("Attendee removed from the meeting.");
         }
 
-    
+
+        [HttpPost]
+        [Route("meetings/{id}/attendees")]
+
+        public async Task<ActionResult<MeetingDto>> AddAttendeeToMeeting([FromRoute] int id, [FromBody] AddAttendeeRequest request)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized("User is not authenticated");
+            }
+
+            var meeting = await _db.Meetings
+        .Include(m => m.Attendees)
+        .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (meeting == null)
+            {
+                return NotFound("Meeting not found");
+            }
+
+            var userToAdd = await _userManager.Users
+        .FirstOrDefaultAsync(u => u.Email == request.Email);
 
 
+            if (userToAdd == null)
+            {
+                return NotFound("User with the given email not found");
+            }
+            if (meeting.Attendees == null)
+            {
+                meeting.Attendees = new List<MeetingAttendee>(); // Initialize the list if it's null
+            }
 
+            if (meeting.Attendees.Any(a => a.Id == userToAdd.Id))
+            {
+                return BadRequest("User is already an attendee of the meeting");
+            }
 
+            meeting.Attendees.Add(new MeetingAttendee
+            {
+                Id=userToAdd.Id,
+                Email=userToAdd.Email,
+                MeetingId=meeting.Id,
+            });
+
+            await _db.SaveChangesAsync();
+            /*
+            var meetingDto = new MeetingDto
+            {
+                Id = meeting.Id,
+                Name = meeting.Name,
+                Description = meeting.Description,
+                Date = meeting.Date,
+                StartTime = new TimeOnly(meeting.StartTime.Hour, meeting.StartTime.Minute),
+                EndTime = new TimeOnly(meeting.EndTime.Hour, meeting.EndTime.Minute),
+                Attendees = meeting.Attendees.Select(a => new CustomMeetingAttendees
+                {
+                    UserId = a.Id,
+                    Email = a.Email
+                }).ToList()
+            };
+
+            */
+
+            var meetingDto = _mapper.Map<MeetingDto>(meeting);
+            return Ok(meetingDto);
 
         }
+
+
+
+
+    }
 
 }
